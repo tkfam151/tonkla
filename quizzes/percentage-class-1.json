@@ -1,0 +1,46 @@
+{
+  "slug": "percentage-class-1",
+  "title": "Percentage Class 1",
+  "category": "Grade 6",
+  "videoUrl": "https://www.youtube.com/watch?v=k5snOgFX3-A",
+  "description": "",
+  "published": true,
+  "updatedAt": "2026-11-09T14:05:40.374Z",
+  "questions": [
+    {
+      "id": "4e39218c34bb",
+      "type": "short",
+      "prompt": "Find 35% of 240",
+      "imageUrl": "",
+      "key": "=0nIiojIu9Wa0FmbhxGc4VmIs0lI0gjIbpjIzJXZ3NnbhJye"
+    },
+    {
+      "id": "1b806cf98af9",
+      "type": "short",
+      "prompt": "A shirt costs $80. It is sold at a 15% discount. What is the sale price?",
+      "imageUrl": "",
+      "key": "=0nIiojIu9Wa0FmbhxGc4VmIs0lI4YjIbpjIzJXZ3NnbhJye"
+    },
+    {
+      "id": "c5e5ac4b8a4d",
+      "type": "short",
+      "prompt": "The price of a ticket rose from $50 to $65. Find the percentage increase.",
+      "imageUrl": "",
+      "key": "=0nIiojIu9Wa0FmbhxGc4VmIs0lIwMjIbpjIzJXZ3NnbhJye"
+    },
+    {
+      "id": "6d199eddebba",
+      "type": "short",
+      "prompt": "After a 20% discount, a bag costs $96. What was its original price?",
+      "imageUrl": "",
+      "key": "9JiI6IibvlGdh5WYsBHelJCLdJCMyEjIbpjIzJXZ3NnbhJye"
+    },
+    {
+      "id": "93629d937ed5",
+      "type": "short",
+      "prompt": "Tonkla scored 18 out of 24 on a quiz. Express his score as a percentage.",
+      "imageUrl": "",
+      "key": "=0nIiojIu9Wa0FmbhxGc4VmIs0lI1cjIbpjIzJXZ3NnbhJye"
+    }
+  ]
+}
