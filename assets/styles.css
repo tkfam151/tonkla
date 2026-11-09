@@ -142,8 +142,8 @@ h2 { font-size: 24px; font-weight: 700; letter-spacing: -0.025em; margin: 0 0 12
 /* ---------- hero (home) ---------- */
 .hero { text-align: center; padding: 28px 0 36px; }
 .hero-icon {
-  width: 84px; height: 84px; margin: 0 auto 22px; display: block;
-  filter: drop-shadow(0 10px 24px rgba(43, 107, 255, 0.35));
+  width: 48px; height: 48px; margin: 0 auto 18px; display: block;
+  filter: drop-shadow(0 4px 10px rgba(43, 107, 255, 0.25));
 }
 .hero h1 { font-size: clamp(38px, 8vw, 64px); margin-bottom: 14px; }
 .hero h1 .grad {
@@ -499,4 +499,5 @@ label.field > span, .field-label {
   .grid { gap: 14px; grid-template-columns: 1fr; }
   .quiz-card { padding: 22px; }
   .hero { padding-top: 12px; }
+  .hero-icon { width: 40px; height: 40px; margin-bottom: 14px; }
 }
