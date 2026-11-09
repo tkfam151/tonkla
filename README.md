@@ -23,6 +23,24 @@ On a free GitHub account, Pages only works for **public** repositories.
 - **Diagrams:** paste an image link into "Image link".
 - **Video:** paste the YouTube link (`youtu.be/…`, `watch?v=…`, or `shorts/…`). It is embedded above the questions.
 
+- **Video time:** type where the problem is explained (like `3:42`). Viewers get a **Watch** button that plays the video from that moment, and it shows again if they get the question wrong.
+- **Hint:** an optional nudge viewers can open before answering.
+
+## Sharing a quiz in your video
+
+After saving, the editor shows the quiz link with:
+- **QR code:** download a PNG to put on screen in your video. Viewers scan it with their phone camera. The logo sits in the middle, and the code still scans.
+- **Text for description:** ready-to-paste text for the video description or a pinned comment.
+
+Links shared in chats and social apps show a preview card (`assets/og.png`).
+
+## What viewers get
+
+- Video thumbnails on the home page, plus their best score on each quiz (saved in their own browser)
+- Hints and jump-to-the-video buttons while answering
+- At the end: a score ring, confetti for a perfect score, a "Share my score" button, an "Up next" quiz suggestion and a Subscribe button for the channel
+- Search on the home page once there are 7 or more quizzes
+
 Saving creates a commit in the repository, and GitHub Pages takes about a minute to publish it. Untick **Show on the home page** to keep a quiz as a draft. A draft isn't listed on the home page, but anyone with its link can still open it.
 
 ## Good to know

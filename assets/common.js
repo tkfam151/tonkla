@@ -116,3 +116,40 @@ function applySite() {
   document.querySelectorAll('.brand[data-home]').forEach((el) => { el.href = SITE_ROOT; });
 }
 document.addEventListener('DOMContentLoaded', applySite);
+
+// "3:42" <-> 222 seconds. Also accepts "1:02:03", "222" and "3m42s".
+function formatTime(sec) {
+  const s = Math.max(0, Math.round(sec));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor((s % 3600) / 60);
+  const r = String(s % 60).padStart(2, '0');
+  return h ? `${h}:${String(m).padStart(2, '0')}:${r}` : `${m}:${r}`;
+}
+function parseTime(text) {
+  const t = String(text ?? '').trim().toLowerCase();
+  if (!t) return null;
+  if (/^\d+(:\d{1,2}){0,2}$/.test(t)) return t.split(':').reduce((acc, n) => acc * 60 + Number(n), 0);
+  const m = t.match(/^(?:(\d+)h)?\s*(?:(\d+)m)?\s*(?:(\d+)s)?$/);
+  if (m && (m[1] || m[2] || m[3])) return (Number(m[1] || 0) * 3600) + (Number(m[2] || 0) * 60) + Number(m[3] || 0);
+  return null;
+}
+
+// Best scores, remembered on this viewer's device only.
+const Progress = {
+  KEY: 'mtonkla-progress',
+  all() {
+    try { return JSON.parse(localStorage.getItem(this.KEY)) || {}; } catch { return {}; }
+  },
+  get(slug) {
+    return this.all()[slug] || null;
+  },
+  // Returns true when this attempt beats (or is) the best so far.
+  save(slug, correct, total) {
+    const all = this.all();
+    const prev = all[slug];
+    const better = !prev || correct / total > prev.best / prev.total;
+    all[slug] = better ? { best: correct, total, at: Date.now() } : { ...prev, at: Date.now() };
+    try { localStorage.setItem(this.KEY, JSON.stringify(all)); } catch { /* private mode */ }
+    return better;
+  },
+};

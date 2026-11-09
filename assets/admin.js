@@ -262,6 +262,8 @@
         type: x.type,
         prompt: x.prompt,
         imageUrl: x.imageUrl,
+        ...(x.hint ? { hint: x.hint } : {}),
+        ...(Number.isFinite(x.t) ? { t: x.t } : {}),
         ...(x.type === 'choice' ? { choices: x.choices } : {}),
         key: encodeKey(x.type === 'choice'
           ? { correct: x.correct, explanation: x.explanation }
@@ -275,7 +277,10 @@
       ...f,
       questions: (f.questions || []).map((x) => {
         const key = decodeKey(x.key);
-        const base = { id: x.id, type: x.type, prompt: x.prompt || '', imageUrl: x.imageUrl || '', explanation: key.explanation || '' };
+        const base = {
+          id: x.id, type: x.type, prompt: x.prompt || '', imageUrl: x.imageUrl || '',
+          hint: x.hint || '', tText: Number.isFinite(x.t) ? formatTime(x.t) : '', explanation: key.explanation || '',
+        };
         return x.type === 'choice'
           ? { ...base, choices: x.choices || [], correct: key.correct ?? 0 }
           : { ...base, answers: key.answers || [] };
@@ -311,10 +316,15 @@
       const n = i + 1;
       const prompt = String(q.prompt || '').trim();
       if (!prompt) throw new Error(`Question ${n} needs a question.`);
+      const tText = String(q.tText || '').trim();
+      const t = parseTime(tText);
+      if (tText && t === null) throw new Error(`Question ${n}: write the video time like 3:42.`);
       const base = {
         id: /^[a-f0-9]{12}$/.test(q.id || '') ? q.id : newId(),
         prompt,
         imageUrl: String(q.imageUrl || '').trim(),
+        hint: String(q.hint || '').trim(),
+        ...(t !== null ? { t } : {}),
         explanation: String(q.explanation || '').trim(),
       };
       if (q.type === 'choice') {
@@ -364,6 +374,7 @@
         </div>
         <div class="row-actions">
           <button class="btn sm" data-copy="${esc(q.slug)}">Copy link</button>
+          <button class="btn sm" data-qr="${esc(q.slug)}" data-title="${esc(q.title)}">QR code</button>
           <a class="btn sm" href="${esc(quizLink(q.slug))}" target="_blank" rel="noopener">Open</a>
           <a class="btn sm primary" href="#/edit/${encodeURIComponent(q.slug)}">Edit</a>
         </div>
@@ -379,6 +390,9 @@
         ? `<div class="card table">${rows}</div>`
         : `<div class="card empty">No quizzes yet. Make one for your latest video.<br><br><a class="btn primary" href="#/new">+ New quiz</a></div>`}`;
 
+    app.querySelectorAll('[data-qr]').forEach((btn) => {
+      btn.addEventListener('click', () => showShareModal(btn.dataset.qr, btn.dataset.title, 'qr'));
+    });
     app.querySelectorAll('[data-copy]').forEach((btn) => {
       btn.addEventListener('click', () => {
         copyText(quizLink(btn.dataset.copy));
@@ -390,8 +404,8 @@
 
   // ---------------- editor ----------------
   const blankQuestion = (type = 'choice') => (type === 'choice'
-    ? { type: 'choice', prompt: '', choices: ['', '', '', ''], correct: 0, explanation: '', imageUrl: '' }
-    : { type: 'short', prompt: '', answers: [], explanation: '', imageUrl: '' });
+    ? { type: 'choice', prompt: '', choices: ['', '', '', ''], correct: 0, explanation: '', imageUrl: '', hint: '', tText: '' }
+    : { type: 'short', prompt: '', answers: [], explanation: '', imageUrl: '', hint: '', tText: '' });
 
   async function showEditor(slug) {
     let quiz;
@@ -430,8 +444,12 @@
           <div class="share">
             <b>${justSaved ? 'Saved! ' : ''}Share link:</b>
             <code>${esc(quizLink(savedSlug))}</code>
-            <button class="btn sm" id="copy-link">Copy</button>
-            <a class="btn sm" href="${esc(quizLink(savedSlug))}" target="_blank" rel="noopener">Open</a>
+            <div class="share-tools">
+              <button class="btn sm" id="copy-link">Copy</button>
+              <button class="btn sm" id="show-qr">QR code</button>
+              <button class="btn sm" id="show-desc">Text for description</button>
+              <a class="btn sm" href="${esc(quizLink(savedSlug))}" target="_blank" rel="noopener">Open</a>
+            </div>
           </div>
           ${justSaved ? '<div class="notice">GitHub Pages takes about a minute to publish. If the link shows old content, wait a moment and refresh.</div>' : ''}` : ''}
 
@@ -511,14 +529,29 @@
             <textarea data-q="${i}" data-field="prompt" rows="3" placeholder="Type the problem…">${esc(q.prompt)}</textarea>
             <div class="preview" data-preview="${i}">${/\$|\\\(|\\\[/.test(q.prompt) ? rich(q.prompt) : ''}</div>
           </label>
-          <label class="field"><span>Image link <span class="muted" style="font-weight:400">(optional, for diagrams)</span></span>
-            <input type="url" data-q="${i}" data-field="imageUrl" value="${esc(q.imageUrl || '')}" placeholder="https://…/figure.png">
-          </label>
+          <div class="row2">
+            <label class="field"><span>Image link <span class="muted" style="font-weight:400">(optional, for diagrams)</span></span>
+              <input type="url" data-q="${i}" data-field="imageUrl" value="${esc(q.imageUrl || '')}" placeholder="https://…/figure.png">
+            </label>
+            <label class="field"><span>Video time <span class="muted" style="font-weight:400">(optional)</span></span>
+              <input type="text" class="time-input" data-q="${i}" data-field="tText" value="${esc(q.tText || '')}" placeholder="3:42" inputmode="numeric">
+              <div class="hint" data-time-hint="${i}">${timeHint(q.tText)}</div>
+            </label>
+          </div>
           ${body}
+          <label class="field"><span>Hint <span class="muted" style="font-weight:400">(optional, shown if the viewer asks)</span></span>
+            <textarea data-q="${i}" data-field="hint" rows="1" placeholder="A nudge, not the answer">${esc(q.hint || '')}</textarea>
+          </label>
           <label class="field" style="margin-bottom:0"><span>Explanation <span class="muted" style="font-weight:400">(shown after answering)</span></span>
             <textarea data-q="${i}" data-field="explanation" rows="2" placeholder="How to solve it">${esc(q.explanation)}</textarea>
           </label>
         </section>`;
+    }
+
+    function timeHint(text) {
+      const t = parseTime(text);
+      if (!String(text || '').trim()) return 'Where this is explained. Adds a “Watch” button.';
+      return t === null ? 'Write it like 3:42 or 1:02:30.' : `✓ Viewers can jump to ${formatTime(t)}.`;
     }
 
     function videoHint(url) {
@@ -550,6 +583,8 @@
       $('#f-desc').addEventListener('input', (e) => { draft.description = e.target.value; touch(); });
       $('#f-published').addEventListener('change', (e) => { draft.published = e.target.checked; touch(); });
       $('#copy-link')?.addEventListener('click', () => copyText(quizLink(savedSlug)));
+      $('#show-qr')?.addEventListener('click', () => showShareModal(savedSlug, quiz.title, 'qr'));
+      $('#show-desc')?.addEventListener('click', () => showShareModal(savedSlug, quiz.title, 'desc'));
 
       const qs = $('#questions');
       const previewTimers = {};
@@ -562,6 +597,9 @@
         if (el.dataset.field === 'answers') q.answers = el.value.split('\n');
         else if (el.dataset.field) q[el.dataset.field] = el.value;
         else if (el.dataset.choice !== undefined) q.choices[Number(el.dataset.choice)] = el.value;
+        if (el.dataset.field === 'tText') {
+          qs.querySelector(`[data-time-hint="${i}"]`).textContent = timeHint(q.tText);
+        }
         if (el.dataset.field === 'prompt') {
           clearTimeout(previewTimers[i]);
           previewTimers[i] = setTimeout(() => {
@@ -586,7 +624,9 @@
         if (el.dataset.type) {
           if (q.type === el.dataset.type) return;
           const fresh = blankQuestion(el.dataset.type);
-          draft.questions[i] = { ...fresh, id: q.id, prompt: q.prompt, explanation: q.explanation, imageUrl: q.imageUrl };
+          draft.questions[i] = {
+            ...fresh, id: q.id, prompt: q.prompt, explanation: q.explanation, imageUrl: q.imageUrl, hint: q.hint, tText: q.tText,
+          };
         } else if (el.dataset.move) {
           const j = i + Number(el.dataset.move);
           [draft.questions[i], draft.questions[j]] = [draft.questions[j], draft.questions[i]];
@@ -702,6 +742,100 @@
     }
 
     render();
+  }
+
+  // ---------------- share: QR code & description text ----------------
+  // Draws the quiz link as a QR code with the logo in the middle.
+  async function drawQR(url, size) {
+    const qr = qrcode(0, 'H'); // high error correction leaves room for the logo
+    qr.addData(url);
+    qr.make();
+    const count = qr.getModuleCount();
+    const quiet = 3;
+    const cell = Math.floor(size / (count + quiet * 2));
+    const real = cell * (count + quiet * 2);
+    const canvas = document.createElement('canvas');
+    canvas.width = canvas.height = real;
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = '#fff';
+    ctx.fillRect(0, 0, real, real);
+    ctx.fillStyle = '#111';
+    for (let r = 0; r < count; r++) {
+      for (let c = 0; c < count; c++) {
+        if (qr.isDark(r, c)) ctx.fillRect((c + quiet) * cell, (r + quiet) * cell, cell, cell);
+      }
+    }
+    const logo = new Image();
+    logo.src = `${SITE_ROOT}assets/logo.svg`;
+    await logo.decode().catch(() => {});
+    if (logo.complete && logo.naturalWidth) {
+      const ls = Math.round(real * 0.2);
+      const pad = Math.round(ls * 0.12);
+      const x = (real - ls) / 2;
+      ctx.fillStyle = '#fff';
+      roundRect(ctx, x - pad, x - pad, ls + pad * 2, ls + pad * 2, (ls + pad * 2) * 0.24);
+      ctx.drawImage(logo, x, x, ls, ls);
+    }
+    return canvas;
+  }
+  function roundRect(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+    ctx.fill();
+  }
+
+  async function showShareModal(slug, title, mode) {
+    const url = quizLink(slug);
+    const desc = `📝 Practice problems for this video: ${url}\nTry them yourself and see the step-by-step answers.`;
+    const back = document.createElement('div');
+    back.className = 'modal-backdrop';
+    back.innerHTML = mode === 'qr' ? `
+      <div class="modal" role="dialog" aria-modal="true" aria-label="QR code">
+        <h2>QR code</h2>
+        <p class="small muted">Put this on screen in your video. Viewers point their phone camera at it to open the quiz.</p>
+        <div class="qr"></div>
+        <div class="actions">
+          <button class="btn primary" id="qr-download">Download PNG</button>
+          <button class="btn" data-close>Done</button>
+        </div>
+      </div>` : `
+      <div class="modal" role="dialog" aria-modal="true" aria-label="Text for description">
+        <h2>Text for your video</h2>
+        <p class="small muted">Paste this into the video description or a pinned comment.</p>
+        <textarea rows="4" readonly>${esc(desc)}</textarea>
+        <div class="actions">
+          <button class="btn primary" id="desc-copy">Copy text</button>
+          <button class="btn" data-close>Done</button>
+        </div>
+      </div>`;
+    document.body.appendChild(back);
+    const close = () => { back.remove(); document.removeEventListener('keydown', onKey); };
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    document.addEventListener('keydown', onKey);
+    back.addEventListener('click', (e) => { if (e.target === back || e.target.closest('[data-close]')) close(); });
+    if (mode === 'qr') {
+      const preview = await drawQR(url, 520);
+      back.querySelector('.qr').appendChild(preview);
+      back.querySelector('#qr-download').addEventListener('click', async () => {
+        const big = await drawQR(url, 1200);
+        const a = document.createElement('a');
+        a.href = big.toDataURL('image/png');
+        a.download = `${slug}-qr.png`;
+        a.click();
+      });
+      back.querySelector('#qr-download').focus();
+    } else {
+      back.querySelector('#desc-copy').addEventListener('click', async () => {
+        await copyText(desc);
+        toast('Text copied');
+      });
+      back.querySelector('#desc-copy').focus();
+    }
   }
 
   // Write the quiz list. If it changed on GitHub meanwhile, reload and try once more.
