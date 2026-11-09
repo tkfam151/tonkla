@@ -1,0 +1,21 @@
+# One-click deploy on Render: Dashboard → New → Blueprint → pick this repo.
+# Render will ask you for ADMIN_PASSWORD (it is never stored in the repo).
+services:
+  - type: web
+    name: mtonkla-practice
+    runtime: node
+    plan: starter            # a persistent disk needs a paid plan; free plans lose quizzes on redeploy
+    buildCommand: npm install
+    startCommand: npm start
+    healthCheckPath: /api/quizzes
+    envVars:
+      - key: ADMIN_PASSWORD
+        sync: false          # you type this in Render, it is not committed
+      - key: SESSION_SECRET
+        generateValue: true
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: quizzes
+      mountPath: /var/data
+      sizeGB: 1

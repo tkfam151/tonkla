@@ -80,7 +80,7 @@ const LETTERS = 'ABCDEFGHIJ';
 
 // Fill in site name and channel link from /config.js.
 function applySite() {
-  const site = window.SITE || { name: 'Math Practice', channelUrl: '' };
+  const site = window.SITE || { name: 'MTonkla Practice', channelUrl: 'https://www.youtube.com/@MTonkla' };
   document.querySelectorAll('.brand-name').forEach((el) => { el.textContent = site.name; });
   document.querySelectorAll('[data-channel-link]').forEach((el) => {
     if (site.channelUrl) { el.href = site.channelUrl; el.hidden = false; } else { el.hidden = true; }

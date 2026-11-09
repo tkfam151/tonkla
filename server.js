@@ -193,7 +193,7 @@ function createApp({ dataDir, adminPassword, sessionSecret, siteName, channelUrl
   app.use('/api', (req, res) => res.status(404).json({ error: 'Not found.' }));
 
   // ---------- pages ----------
-  const site = { name: siteName || 'Math Practice', channelUrl: channelUrl || '' };
+  const site = { name: siteName || 'MTonkla Practice', channelUrl: channelUrl || 'https://www.youtube.com/@MTonkla' };
   app.get('/config.js', (req, res) => {
     res.type('application/javascript').send(`window.SITE = ${JSON.stringify(site).replace(/</g, '\\u003c')};`);
   });
