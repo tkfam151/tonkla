@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Page not found</title>
+  <style>
+    :root { color-scheme: light dark; }
+    body { margin: 0; font: 16px/1.5 system-ui, sans-serif; display: grid; place-items: center; min-height: 100vh; padding: 16px; text-align: center; background: #f7f6f2; color: #1d1c1a; }
+    @media (prefers-color-scheme: dark) { body { background: #141413; color: #ecebe6; } a { color: #7c95f5; } }
+  </style>
+</head>
+<body>
+  <div>
+    <h1>Page not found</h1>
+    <p id="msg">This link doesn't go anywhere.</p>
+    <p><a id="home" href="/">See all practice quizzes</a></p>
+  </div>
+  <script>
+    // On user.github.io/repo/, send people to the repo's home page.
+    var parts = location.pathname.split('/').filter(Boolean);
+    if (location.hostname.endsWith('github.io') && parts.length) document.getElementById('home').href = '/' + parts[0] + '/';
+  </script>
+</body>
+</html>

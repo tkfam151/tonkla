@@ -1,29 +1,30 @@
-# Practice-problem quizzes for the channel
+# MTonkla Practice
 
-A small site that goes with each video. Viewers open a link, work through the problems, and see a worked explanation after each one. You make the quizzes yourself at `/admin`.
+Practice-problem quizzes for the [MTonkla](https://www.youtube.com/@MTonkla) channel, hosted free on GitHub Pages. Viewers open a quiz link, work through the problems, and see the answer and a worked explanation after each one.
 
-- **`/`**: all published quizzes, filterable by level (Olympiad, Grade 6, Grade 7, Other)
-- **`/q/<link-name>`**: one quiz. It shows the video embed, one question at a time, instant feedback, the explanation, and a score with review at the end.
-- **`/admin`**: password-protected. Create, edit, publish and delete quizzes, copy the share link, and see attempt counts and average scores.
+- **Home page** (`/`): all quizzes, filterable by level (Olympiad, Grade 6, Grade 7, Other)
+- **Quiz page** (`quiz.html?q=<link-name>`): the video embed, one question at a time, instant feedback, and a score with a review at the end
+- **Admin** (`/admin/`): create, edit and delete quizzes, and copy the share link
 
-## Run it
+## Turn on GitHub Pages (one time)
 
-```bash
-npm install
-ADMIN_PASSWORD=choose-something npm start
-# open http://localhost:3000/admin
-```
+1. On GitHub, open this repository → **Settings → Pages**.
+2. Under **Build and deployment**, choose **Deploy from a branch**. Pick the branch that has this code (the default branch) and the **/ (root)** folder, then click **Save**.
+3. After a minute or two the site is live at **https://tkfam151.github.io/tonkla/**.
+   Admin is at **https://tkfam151.github.io/tonkla/admin/**.
 
-| Variable | What it does |
-| --- | --- |
-| `ADMIN_PASSWORD` | **Required for `/admin`.** If it isn't set, admin login is turned off. |
-| `PORT` | Port to listen on (default `3000`). |
-| `DATA_DIR` | Where quizzes are saved (default `./data`). Use a persistent disk in production. |
-| `SITE_NAME` | Name shown in the header (default "MTonkla Practice"). |
-| `CHANNEL_URL` | YouTube channel linked in the header (default `https://www.youtube.com/@MTonkla`). |
-| `SESSION_SECRET` | Optional. Signs the admin login cookie. By default it is derived from the password, so changing the password logs everyone out. |
+On a free GitHub account, Pages only works for **public** repositories.
 
-On first start a sample Grade 6 quiz is created so the site isn't empty. Edit it or delete it from `/admin`.
+## Set up admin (once per device)
+
+GitHub Pages can't run a server, so the admin page saves quizzes straight into this repository through GitHub. It needs a token that is allowed to edit the repo:
+
+1. Go to **GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token**.
+2. **Repository access:** Only select repositories → `tonkla`.
+3. **Repository permissions → Contents:** Read and write.
+4. Open `/admin/`, paste the token, and choose your admin password.
+
+The token is encrypted with your password and kept only in that browser. The password is never uploaded or stored in the repo. Next time you open admin you only type the password. Use **Lock** in the header when you're done on a shared computer.
 
 ## Writing questions
 
@@ -33,24 +34,18 @@ On first start a sample Grade 6 quiz is created so the site isn't empty. Edit it
 - **Diagrams:** paste an image link into "Image link".
 - **Video:** paste the YouTube link (`youtu.be/…`, `watch?v=…`, or `shorts/…`). It is embedded above the questions.
 
-Quizzes start as drafts. Tick **Published** and save to get the link for your video description or pinned comment. While a quiz is a draft, only you (logged in) can preview it.
+Saving creates a commit in the repository, and GitHub Pages takes about a minute to publish it. Untick **Show on the home page** to keep a quiz as a draft. A draft isn't listed on the home page, but anyone with its link can still open it.
 
-## How it works
+## Good to know
 
-- Node + Express. The only other dependency is KaTeX, which the site serves itself, so there is no external CDN.
-- Quizzes are stored in `DATA_DIR/quizzes.json`, which is written atomically.
-- Answers never reach the browser. Each answer is checked on the server, and the final score is re-graded on the server so the stats can't be faked.
+- Quizzes live in `quizzes/`: `index.json` is the list, and each quiz is `<link-name>.json`.
+- Answers are scrambled in those files so they don't show at a glance. Because this is a static site, a determined viewer could still decode them. That's fine for practice; don't use it for graded tests.
+- To change the header name or channel link, edit `assets/config.js`.
+- KaTeX (the math renderer) is included in `vendor/katex`, so the site has no outside dependencies.
 
-## Deploying (putting it on the internet)
-
-**Easiest: Render.** Sign in at render.com with GitHub → **New → Blueprint** → choose this repo. Render reads `render.yaml`, asks you for `ADMIN_PASSWORD`, and gives you a link like `https://mtonkla-practice.onrender.com`. Your admin page is that link plus `/admin`. The config uses the Starter plan (about $7/month plus about $0.25/month for the 1 GB disk) because the free plan has no persistent disk and would lose your quizzes on every redeploy.
-
-Never put the password in the code or the repo; set it only in the host's settings.
-
-Any other Node 18+ host works too (Render, Railway, Fly.io, a VPS). Set `ADMIN_PASSWORD`, and point `DATA_DIR` at a persistent volume. On hosts with an ephemeral filesystem, your quizzes would disappear on every redeploy.
-
-## Tests
+## Running locally
 
 ```bash
-npm test
+python3 -m http.server 8000   # then open http://localhost:8000
+npm test                      # answer-checking tests
 ```

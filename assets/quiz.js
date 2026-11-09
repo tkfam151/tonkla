@@ -1,15 +1,16 @@
 (async function () {
   const app = document.getElementById('app');
-  const slug = decodeURIComponent(location.pathname.split('/').filter(Boolean)[1] || '');
+  const slug = new URLSearchParams(location.search).get('q') || '';
 
   let quiz;
   try {
-    quiz = await api('GET', `/api/quizzes/${encodeURIComponent(slug)}`);
+    if (!/^[a-z0-9-]+$/.test(slug)) throw new Error('bad slug');
+    quiz = await getJSON(`quizzes/${slug}.json`);
   } catch (err) {
     app.innerHTML = `
       <h1>Quiz not found</h1>
       <p class="lede">This link may be old, or the quiz isn't published yet.</p>
-      <a class="btn primary" href="/">See all practice quizzes</a>`;
+      <a class="btn primary" href="${esc(SITE_ROOT)}">See all practice quizzes</a>`;
     return;
   }
 
@@ -24,7 +25,7 @@
         <h1>${rich(quiz.title)}</h1>
         ${quiz.description ? `<p class="lede">${rich(quiz.description)}</p>` : ''}
       </div>
-      ${quiz.published ? '' : '<div class="notice">Draft preview: only you can see this until you publish it.</div>'}
+      ${quiz.published ? '' : '<div class="notice">Draft preview: this quiz is not listed on the home page yet.</div>'}
       ${vid ? `
         <details class="card video-box">
           <summary>Watch the video</summary>
@@ -142,18 +143,11 @@
     state.busy = true;
     if (reveal) { delete state.answers[q.id]; state.selected = null; }
     else if (q.type === 'choice') state.answers[q.id] = state.selected;
-    try {
-      state.results[q.id] = await api('POST', `/api/quizzes/${encodeURIComponent(quiz.slug)}/check`, {
-        questionId: q.id,
-        answer: reveal ? null : state.answers[q.id],
-      });
-      if (reveal) state.results[q.id].correct = false;
-      renderQuestion();
-    } catch (err) {
-      toast('Could not check that answer. Try again.');
-    } finally {
-      state.busy = false;
-    }
+    const key = decodeKey(q.key);
+    const result = Grading.gradeQuestion({ ...q, ...key }, reveal ? null : state.answers[q.id]);
+    state.results[q.id] = { ...result, correct: reveal ? false : result.correct, explanation: key.explanation || '' };
+    state.busy = false;
+    renderQuestion();
   }
 
   function goNext() {
@@ -169,11 +163,7 @@
 
   async function finish() {
     const total = quiz.questions.length;
-    let correct = quiz.questions.filter((q) => state.results[q.id]?.correct).length;
-    try {
-      const res = await api('POST', `/api/quizzes/${encodeURIComponent(quiz.slug)}/attempts`, { answers: state.answers });
-      correct = res.correct;
-    } catch { /* score shown from local results */ }
+    const correct = quiz.questions.filter((q) => state.results[q.id]?.correct).length;
 
     const ratio = total ? correct / total : 0;
     const message = ratio === 1 ? 'Perfect score! 🎉'
@@ -203,7 +193,7 @@
         <div class="actions" style="justify-content:center">
           <button class="btn primary" id="retry">Try again</button>
           ${quiz.videoUrl ? `<a class="btn" href="${esc(quiz.videoUrl)}" target="_blank" rel="noopener">Back to the video</a>` : ''}
-          <a class="btn" href="/?level=${encodeURIComponent(quiz.category)}">More ${esc(quiz.category)} practice</a>
+          <a class="btn" href="${esc(SITE_ROOT)}?level=${encodeURIComponent(quiz.category)}">More ${esc(quiz.category)} practice</a>
         </div>
         <ul class="review">${review}</ul>
       </section>`;

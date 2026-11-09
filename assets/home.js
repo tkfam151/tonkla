@@ -5,7 +5,8 @@
 
   let data;
   try {
-    data = await api('GET', '/api/quizzes');
+    const index = await getJSON('quizzes/index.json');
+    data = { categories: CATEGORIES, quizzes: (index.quizzes || []).filter((q) => q.published) };
   } catch (err) {
     emptyEl.hidden = false;
     emptyEl.textContent = 'Could not load quizzes. Please refresh the page.';
@@ -29,7 +30,7 @@
     const items = data.quizzes.filter((q) => active === 'All' || q.category === active);
     emptyEl.hidden = items.length > 0;
     listEl.innerHTML = items.map((q) => `
-      <a class="card quiz-card" href="/q/${encodeURIComponent(q.slug)}">
+      <a class="card quiz-card" href="${esc(quizLink(q.slug))}">
         <div><span class="tag" data-cat="${esc(q.category)}">${esc(q.category)}</span></div>
         <h3>${rich(q.title)}</h3>
         <p>${rich(q.description)}</p>

@@ -1,6 +1,6 @@
 const test = require('node:test');
 const assert = require('node:assert');
-const { answersMatch, gradeQuestion, parseNumber } = require('../lib/grading');
+const { answersMatch, gradeQuestion, parseNumber } = require('../assets/grading');
 
 test('numbers match in any equal form', () => {
   assert.ok(answersMatch('0.75', '3/4'));

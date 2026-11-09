@@ -32,23 +32,50 @@ function youtubeId(url) {
   return m ? m[1] : null;
 }
 
-async function api(method, url, body) {
-  const res = await fetch(url, {
-    method,
-    headers: body ? { 'Content-Type': 'application/json' } : {},
-    body: body ? JSON.stringify(body) : undefined,
-    credentials: 'same-origin',
-  });
-  const data = await res.json().catch(() => ({}));
+// Base URL of the site (works at user.github.io/repo/ or any other path).
+const SITE_ROOT = new URL(document.currentScript.src.replace(/assets\/common\.js.*$/, ''), location.href).href;
+
+function quizLink(slug) {
+  return `${SITE_ROOT}quiz.html?q=${encodeURIComponent(slug)}`;
+}
+
+// Read a JSON file from the site, skipping stale browser caches.
+async function getJSON(path) {
+  const res = await fetch(SITE_ROOT + path, { cache: 'no-cache' });
   if (!res.ok) {
-    const err = new Error(data.error || `Request failed (${res.status})`);
+    const err = new Error(`Could not load ${path} (${res.status})`);
     err.status = res.status;
     throw err;
   }
-  return data;
+  return res.json();
 }
 
-function toast(msg) {
+// UTF-8 safe base64.
+function b64encode(text) {
+  const bytes = new TextEncoder().encode(text);
+  let bin = '';
+  for (let i = 0; i < bytes.length; i += 0x8000) bin += String.fromCharCode(...bytes.subarray(i, i + 0x8000));
+  return btoa(bin);
+}
+function b64decode(b64) {
+  const bin = atob(String(b64).replace(/\s/g, ''));
+  return new TextDecoder().decode(Uint8Array.from(bin, (c) => c.charCodeAt(0)));
+}
+
+// Answers are scrambled in the quiz files so they don't show at a glance.
+// This is not real security: a determined viewer could still decode them.
+function encodeKey(obj) {
+  return b64encode(JSON.stringify(obj)).split('').reverse().join('');
+}
+function decodeKey(str) {
+  try {
+    return JSON.parse(b64decode(String(str).split('').reverse().join('')));
+  } catch {
+    return {};
+  }
+}
+
+function toast(msg, ms = 1800) {
   let el = document.querySelector('.toast');
   if (!el) {
     el = document.createElement('div');
@@ -59,7 +86,7 @@ function toast(msg) {
   el.textContent = msg;
   el.classList.add('show');
   clearTimeout(toast.t);
-  toast.t = setTimeout(() => el.classList.remove('show'), 1800);
+  toast.t = setTimeout(() => el.classList.remove('show'), ms);
 }
 
 async function copyText(text) {
@@ -77,14 +104,15 @@ async function copyText(text) {
 }
 
 const LETTERS = 'ABCDEFGHIJ';
+const CATEGORIES = ['Olympiad', 'Grade 6', 'Grade 7', 'Other'];
 
-// Fill in site name and channel link from /config.js.
+// Fill in site name and channel link from config.js.
 function applySite() {
-  const site = window.SITE || { name: 'MTonkla Practice', channelUrl: 'https://www.youtube.com/@MTonkla' };
-  document.querySelectorAll('.brand-name').forEach((el) => { el.textContent = site.name; });
+  const site = window.SITE || {};
+  document.querySelectorAll('.brand-name').forEach((el) => { if (site.name) el.textContent = site.name; });
   document.querySelectorAll('[data-channel-link]').forEach((el) => {
     if (site.channelUrl) { el.href = site.channelUrl; el.hidden = false; } else { el.hidden = true; }
   });
-  return site;
+  document.querySelectorAll('.brand[data-home]').forEach((el) => { el.href = SITE_ROOT; });
 }
 document.addEventListener('DOMContentLoaded', applySite);

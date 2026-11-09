@@ -1,20 +1,11 @@
 {
-  "name": "tonkla-practice",
-  "version": "1.0.0",
-  "description": "Practice-problem quizzes that go with each channel video (Olympiad, Grade 6, Grade 7).",
-  "main": "server.js",
-  "type": "commonjs",
+  "name": "mtonkla-practice",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Practice-problem quizzes for the MTonkla channel, hosted on GitHub Pages.",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js",
+    "start": "python3 -m http.server 8000",
     "test": "node --test test/*.test.js"
   },
-  "engines": {
-    "node": ">=18"
-  },
-  "license": "MIT",
-  "dependencies": {
-    "express": "^4.21.2",
-    "katex": "^0.16.11"
-  }
+  "license": "MIT"
 }

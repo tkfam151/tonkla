@@ -1,0 +1,14 @@
+{
+  "quizzes": [
+    {
+      "slug": "sample-fractions-warm-up",
+      "title": "Sample: Fractions warm-up",
+      "category": "Grade 6",
+      "description": "An example quiz so you can see how things look. Edit or delete it from the admin page.",
+      "videoUrl": "",
+      "questionCount": 3,
+      "published": true,
+      "updatedAt": "2026-11-09T00:00:00.000Z"
+    }
+  ]
+}

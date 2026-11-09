@@ -1,3 +1,7 @@
+(function (root, factory) {
+  if (typeof module === 'object' && module.exports) module.exports = factory();
+  else root.Grading = factory();
+})(typeof self !== 'undefined' ? self : this, function () {
 'use strict';
 
 // Turn "3/4", "-1.5", "1,000", "  42 " into a number, or null if it isn't one.
@@ -49,4 +53,5 @@ function gradeQuestion(question, answer) {
   };
 }
 
-module.exports = { parseNumber, normalizeText, answersMatch, gradeQuestion };
+return { parseNumber, normalizeText, answersMatch, gradeQuestion };
+});
