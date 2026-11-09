@@ -11,20 +11,9 @@ Practice-problem quizzes for the [MTonkla](https://www.youtube.com/@MTonkla) cha
 1. On GitHub, open this repository → **Settings → Pages**.
 2. Under **Build and deployment**, choose **Deploy from a branch**. Pick the branch that has this code (the default branch) and the **/ (root)** folder, then click **Save**.
 3. After a minute or two the site is live at **https://tkfam151.github.io/tonkla/**.
-   Admin is at **https://tkfam151.github.io/tonkla/admin/**.
 
 On a free GitHub account, Pages only works for **public** repositories.
 
-## Set up admin (once per device)
-
-GitHub Pages can't run a server, so the admin page saves quizzes straight into this repository through GitHub. It needs a token that is allowed to edit the repo:
-
-1. Go to **GitHub → Settings → Developer settings → Fine-grained tokens → Generate new token**.
-2. **Repository access:** Only select repositories → `tonkla`.
-3. **Repository permissions → Contents:** Read and write.
-4. Open `/admin/`, paste the token, and choose your admin password.
-
-The token is encrypted with your password and kept only in that browser. The password is never uploaded or stored in the repo. Next time you open admin you only type the password. Use **Lock** in the header when you're done on a shared computer.
 
 ## Writing questions
 
