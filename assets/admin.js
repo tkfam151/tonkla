@@ -144,6 +144,7 @@
   function showSetup() {
     app.innerHTML = `
       <form class="card login" id="setup" style="max-width:520px">
+        <img class="login-icon" src="${esc(SITE_ROOT)}assets/logo.svg" alt="">
         <h2>Set up admin on this device</h2>
         <p class="small muted">Quizzes are saved as files in your GitHub repository, so this page needs a GitHub token that can edit it. You only do this once per device.</p>
         <ol class="small" style="padding-left:20px;margin:0 0 16px">
@@ -204,7 +205,8 @@
   function showUnlock() {
     app.innerHTML = `
       <form class="card login" id="unlock">
-        <h2>Admin</h2>
+        <img class="login-icon" src="${esc(SITE_ROOT)}assets/logo.svg" alt="">
+        <h2>Welcome back</h2>
         <label class="field"><span>Password</span>
           <input type="password" name="password" required autocomplete="current-password" autofocus>
         </label>

@@ -187,8 +187,18 @@
     app.innerHTML = `
       ${header()}
       <section class="card result">
-        <div class="muted">Your score</div>
-        <div class="score">${correct}<small> / ${total}</small></div>
+        <div class="muted small">Your score</div>
+        <div class="ring">
+          <svg viewBox="0 0 120 120" aria-hidden="true">
+            <defs><linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0" stop-color="#2b8cff"/><stop offset="1" stop-color="#6a4cf5"/>
+            </linearGradient></defs>
+            <circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="10"/>
+            <circle class="value" cx="60" cy="60" r="52" fill="none" stroke="url(#ringGrad)" stroke-width="10"
+              stroke-linecap="round" stroke-dasharray="326.73" stroke-dashoffset="326.73"/>
+          </svg>
+          <div class="score">${correct}<small>/${total}</small></div>
+        </div>
         <p>${message}</p>
         <div class="actions" style="justify-content:center">
           <button class="btn primary" id="retry">Try again</button>
@@ -198,6 +208,10 @@
         <ul class="review">${review}</ul>
       </section>`;
     renderMath(app);
+    const ring = app.querySelector('.ring .value');
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      ring.style.strokeDashoffset = String(326.73 * (1 - ratio));
+    }));
     app.querySelector('#retry').addEventListener('click', () => {
       Object.assign(state, { index: 0, selected: null, answers: {}, results: {} });
       renderQuestion();
